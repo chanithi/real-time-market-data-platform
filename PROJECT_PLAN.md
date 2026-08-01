@@ -489,3 +489,184 @@ After Sprint 2:
               |
               |
       Console Consumer
+
+# Sprint 3 - API Producer
+
+## Objective
+
+Develop a Python producer that retrieves real-time cryptocurrency market data from the CoinGecko API, transforms it into a standardized event schema, and publishes the events to Apache Kafka.
+
+---
+
+## Completed Tasks
+
+- [x] Created reusable configuration management using `.env`
+- [x] Integrated CoinGecko Demo API
+- [x] Implemented `CoinGeckoClient` for API communication
+- [x] Successfully authenticated using API key
+- [x] Retrieved live cryptocurrency market data
+- [x] Transformed raw API responses into a standardized event schema
+- [x] Implemented reusable Kafka producer
+- [x] Serialized events as JSON
+- [x] Successfully published events to the `market-price-events` Kafka topic
+- [x] Verified events using Kafka Console Consumer
+
+---
+
+## Components Developed
+
+### Configuration
+
+```
+producer/config.py
+```
+
+Responsibilities:
+
+- Load environment variables
+- Centralize application configuration
+- Prevent hardcoded secrets
+
+---
+
+### API Client
+
+```
+producer/api_client.py
+```
+
+Responsibilities:
+
+- Connect to CoinGecko API
+- Handle authenticated HTTP requests
+- Retrieve live market data
+- Transform API responses into application events
+
+---
+
+### Kafka Producer
+
+```
+producer/kafka_producer.py
+```
+
+Responsibilities:
+
+- Connect to Kafka broker
+- Serialize events to JSON
+- Publish market events to Kafka topics
+
+---
+
+### Producer Runner
+
+```
+run_producer.py
+```
+
+Responsibilities:
+
+- Retrieve market data
+- Publish each event to Kafka
+- Log successfully published events
+
+---
+
+## Event Schema
+
+Each event published to Kafka follows the structure below:
+
+```json
+{
+  "event_time": "2026-07-30T17:08:20.000Z",
+  "coin_id": "bitcoin",
+  "symbol": "btc",
+  "name": "Bitcoin",
+  "currency": "usd",
+  "price": 64777,
+  "market_cap": 1299571799202,
+  "volume_24h": 31312614419,
+  "price_change_24h": 402.71,
+  "price_change_percentage_24h": 1.4
+}
+```
+
+---
+
+## Pipeline Status
+
+Current real-time pipeline:
+
+```
+CoinGecko API
+      │
+      ▼
+CoinGeckoClient
+      │
+      ▼
+Transform Event Schema
+      │
+      ▼
+Kafka Producer
+      │
+      ▼
+market-price-events
+      │
+      ▼
+Kafka Consumer
+```
+
+---
+
+## Engineering Decisions
+
+### Why use `.env`?
+
+- Protect API credentials
+- Support multiple environments
+- Follow production security practices
+
+### Why create a custom event schema?
+
+Instead of streaming the complete CoinGecko response, only the required attributes are published.
+
+Benefits:
+
+- Stable schema for downstream consumers
+- Reduced message size
+- Easier Spark transformations
+- Consistent BigQuery schema
+
+### Why separate API Client and Kafka Producer?
+
+The project follows the Single Responsibility Principle (SRP):
+
+- API Client handles data extraction.
+- Kafka Producer handles event publishing.
+
+This improves maintainability, testing, and future extensibility.
+
+---
+
+## Current Status
+
+Sprint 3 (Phase 1) Completed ✅
+
+Current Pipeline:
+
+```
+CoinGecko API
+      │
+      ▼
+Python Producer
+      │
+      ▼
+Apache Kafka
+      │
+      ▼
+Kafka Consumer
+```
+
+Next Step:
+
+Build the Spark Structured Streaming consumer to process Kafka events in real time.      
